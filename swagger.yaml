@@ -1,0 +1,150 @@
+swagger: '2.0'
+info:
+  title: Car CRUD API
+  version: 1.0.0
+basePath: /v1
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+definitions:
+  Car:
+    type: object
+    properties:
+      licensePlate:
+        type: string
+        example: "ABC123"
+      brand:
+        type: string
+        example: "Ford"
+      color:
+        type: string
+        example: "Red"
+      plateNumber:
+        type: string
+        example: "CAR001"
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        example: 400
+      message:
+        type: string
+        example: "Invalid input data"
+paths:
+  /cars:
+    get:
+      summary: Get all cars
+      operationId: getCars
+      responses:
+        '200':
+          description: A list of all cars
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Car"
+        '500':
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add a new car
+      operationId: addCar
+      parameters:
+        - in: body
+          name: car
+          description: The car to add
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        '201':
+          description: Car added successfully
+          schema:
+            $ref: "#/definitions/Car"
+        '400':
+          description: Invalid input data
+          schema:
+            $ref: "#/definitions/Error"
+        '500':
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Error"
+  /cars/{licensePlate}:
+    get:
+      summary: Get a car by license plate
+      operationId: getCarByLicensePlate
+      parameters:
+        - name: licensePlate
+          in: path
+          description: License plate of the car to retrieve
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Car retrieved successfully
+          schema:
+            $ref: "#/definitions/Car"
+        '404':
+          description: Car not found
+          schema:
+            $ref: "#/definitions/Error"
+        '500':
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Error"
+    put:
+      summary: Update a car by license plate
+      operationId: updateCarByLicensePlate
+      parameters:
+        - name: licensePlate
+          in: path
+          description: License plate of the car to update
+          required: true
+          type: string
+        - name: car
+          in: body
+          description: The car object with updated information
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        '200':
+          description: Car updated successfully
+          schema:
+            $ref: "#/definitions/Car"
+        '400':
+          description: Invalid input data
+          schema:
+            $ref: "#/definitions/Error"
+        '404':
+          description: Car not found
+          schema:
+            $ref: "#/definitions/Error"
+        '500':
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /car/{licensePlate}:
+      delete:
+        summary: Deletes a car by license plate number
+        operationId: deleteCarByLicensePlate
+        parameters:
+          - name: licensePlate
+            in: path
+            description: License plate number of the car to be deleted
+            required: true
+            type: string
+        responses:
+          204:
+            description: Car successfully deleted
+          404:
+            description: Car with the specified license plate number not found
+          500:
+            description: Internal server error occurred
+            schema:
+              $ref: "#/definitions/Error"

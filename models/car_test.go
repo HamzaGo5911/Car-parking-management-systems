@@ -1,13 +1,15 @@
-package models
+package models_test
 
-import "testing"
+import (
+	"Car-parking-management-systems/models"
+	"testing"
+)
 
 func TestCarModel(t *testing.T) {
 	// create a new Car instance
-	car := Car{
+	car := models.Car{
 		LicensePlate: "ABC123",
 		Brand:        "Ford",
-		CarModel:     "Mustang",
 		Color:        "Red",
 		PlateNumber:  "123456",
 	}
