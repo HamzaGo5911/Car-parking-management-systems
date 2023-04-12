@@ -1,0 +1,108 @@
+swagger: "2.0"
+info:
+  description: "API for managing cars"
+  version: "1.0.0"
+  title: "Car API"
+host: "localhost:8080"
+basePath: "/"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+paths:
+  /cars:
+    post:
+      operationId: "addCar"
+      parameters:
+        - in: "body"
+          name: "car"
+          description: "car's details"
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        201:
+          description: "car added"
+          schema:
+            $ref: "#/definitions/Car"
+        400:
+          description: "bad request"
+        500:
+          description: "internal server error"
+  /cars/{id}:
+    get:
+      operationId: "getCar"
+      parameters:
+        - in: "path"
+          type: "string"
+          name: "id"
+          required: true
+          description: "ID of the car"
+      description: "return car based on ID"
+      responses:
+        200:
+          description: "car response"
+          schema:
+            $ref: "#/definitions/Car"
+        404:
+          description: "car not found"
+        500:
+          description: "internal server error"
+    put:
+      operationId: "updateCar"
+      parameters:
+        - in: "path"
+          type: "string"
+          name: "id"
+          required: true
+          description: "ID of the car"
+        - in: "body"
+          name: "car"
+          description: "car's details"
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        200:
+          description: "car updated"
+          schema:
+            $ref: "#/definitions/Car"
+        400:
+          description: "bad request"
+        404:
+          description: "car not found"
+        500:
+          description: "internal server error"
+    delete:
+      operationId: "deleteCar"
+      parameters:
+        - in: "path"
+          name: "id"
+          type: "string"
+          description: "ID of the car"
+          required: true
+      responses:
+        204:
+          description: "car deleted"
+        404:
+          description: "car not found"
+        500:
+          description: "internal server error"
+definitions:
+  Car:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      licensePlate:
+        type: "string"
+      brand:
+        type: "string"
+      model:
+        type: "string"
+      color:
+        type: "string"
+      plateNumber:
+        type: "string"
