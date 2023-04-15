@@ -7,11 +7,11 @@ import (
 
 // Parking model
 type Parking struct {
-	ID          string    `json:"id"`
-	EntryTime   time.Time `json:"entry_time"`
-	ExitTime    time.Time `json:"exit_time"`
-	HourlyRate  float64   `json:"hourly_rate"`
-	TotalAmount float64   `json:"total_amount"`
+	ID          string    `json:"id" db:"ID"`
+	EntryTime   time.Time `json:"entry_time" db:"EntryTime"`
+	ExitTime    time.Time `json:"exit_time" db:"ExitTime"`
+	HourlyRate  float64   `json:"hourly_rate" db:"HourlyRate"`
+	TotalAmount float64   `json:"total_amount" db:"TotalAmount"`
 }
 
 // GetParkingMap converts the Parking struct to a map[string]interface{}.
