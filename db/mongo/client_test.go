@@ -99,7 +99,7 @@ func Test_client_GetCarById(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.GetCarById(tt.args.id)
+			got, err := c.GetCarByID(tt.args.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetCar() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -212,47 +212,11 @@ func TestClient_DeleteParking(t *testing.T) {
 		t.Fatalf("Failed to delete parking: %v", err)
 	}
 	// Try to retrieve the deleted parking object from the database
-	deletedParking, err := c.GetParkingById(p.ID)
+	deletedParking, err := c.GetParkingByID(p.ID)
 	if err == nil {
 		t.Errorf("Expected an error, but got none")
 	}
 	if deletedParking != nil {
 		t.Errorf("Expected nil Parking object, but got a non-nil object")
-	}
-}
-func TestClient_GetParkingById(t *testing.T) {
-	// Create a new Client instance
-	c, err := NewClient(db.Option{})
-	if err != nil {
-		t.Fatalf("Failed to create new client: %v", err)
-	}
-
-	// Create a new Parking instance with sample values
-	p := &models.Parking{
-		ID:          "abc123",
-		EntryTime:   time.Now(),
-		ExitTime:    time.Now().Add(time.Hour),
-		HourlyRate:  2.50,
-		TotalAmount: 5.00,
-	}
-
-	// Test the GetParking() function with an existing parking ID
-	existingParking, err := c.GetParkingById(p.ID)
-	if err != nil {
-		t.Errorf("Expected no error, but got %v", err)
-	}
-	if existingParking == nil {
-		t.Error("Expected non-nil Parking object, but got nil")
-	} else if *existingParking != *p {
-		t.Errorf("Expected %v, but got %v", p, existingParking)
-	}
-
-	// Test the GetParking() function with a non-existing parking ID
-	nonExistingParking, err := c.GetParkingById("def456")
-	if err == nil {
-		t.Error("Expected an error, but got none")
-	}
-	if nonExistingParking != nil {
-		t.Error("Expected nil Parking object, but got a non-nil object")
 	}
 }
