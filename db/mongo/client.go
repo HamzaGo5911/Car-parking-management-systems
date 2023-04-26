@@ -1,20 +1,19 @@
 package mongo
 
 import (
+	"Car-parking-management-systems/config"
+	"Car-parking-management-systems/db"
+	customErr "Car-parking-management-systems/errors"
+	"Car-parking-management-systems/models"
 	"context"
 	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"Car-parking-management-systems/config"
-	"Car-parking-management-systems/db"
-	customErr "Car-parking-management-systems/errors"
-	"Car-parking-management-systems/models"
+	"time"
 )
 
 const (
@@ -66,10 +65,10 @@ func (c *client) SaveCar(car *models.Car) (string, error) {
 	return car.ID, nil // Return the ID of the saved car
 }
 
-func (c *client) GetCarById(id string) (*models.Car, error) {
+func (c *client) GetCarByID(id string) (*models.Car, error) {
 	var car *models.Car
 	collection := c.conn.Database(viper.GetString(config.DbName)).Collection(carCollection)
-	if err := collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&car); err != nil {
+	if err := collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&car); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, customErr.NewAPIError(customErr.NotFound, fmt.Sprintf("car: %s not found", id))
 		}
@@ -80,7 +79,7 @@ func (c *client) GetCarById(id string) (*models.Car, error) {
 
 func (c *client) DeleteCar(id string) error {
 	collection := c.conn.Database(viper.GetString(config.DbName)).Collection(carCollection)
-	if _, err := collection.DeleteOne(context.Background(), bson.M{"_id": id}); err != nil {
+	if _, err := collection.DeleteOne(context.Background(), bson.M{"id": id}); err != nil {
 		return errors.Wrap(err, "failed to delete car")
 	}
 
@@ -91,17 +90,30 @@ func (c *client) SaveParking(parking *models.Parking) (string, error) {
 	collection := c.conn.Database(viper.GetString(config.DbName)).Collection(parkingCollection)
 	if parking.ID == "" {
 		parking.ID = uuid.NewV4().String()
+		parking.CalculateTotalAmount()
 		if _, err := collection.InsertOne(context.Background(), parking); err != nil {
 			return "", errors.Wrap(err, "failed to add parking")
 		}
 	} else {
 		filter := bson.M{"id": parking.ID}
 		update := bson.M{"$set": parking}
+		parking.CalculateTotalAmount()
 		if _, err := collection.UpdateOne(context.Background(), filter, update); err != nil {
 			return "", errors.Wrap(err, "failed to update parking")
 		}
 	}
 	return parking.ID, nil
+}
+
+func (c *client) GetParkingByID(parkingID string) (*models.Parking, error) {
+	collection := c.conn.Database(viper.GetString(config.DbName)).Collection(parkingCollection)
+	filter := bson.M{"id": parkingID}
+	var parking models.Parking
+	err := collection.FindOne(context.Background(), filter).Decode(&parking)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get parking")
+	}
+	return &parking, nil
 }
 
 func (c *client) DeleteParking(parkingID string) error {
@@ -112,13 +124,30 @@ func (c *client) DeleteParking(parkingID string) error {
 	}
 	return nil
 }
-func (c *client) GetParkingById(parkingID string) (*models.Parking, error) {
+
+// GetParkingsOnDate retrieves all parkings that have the exit time on a specific date
+func (c *client) GetParkingsOnDate(exitDate time.Time) ([]*models.Parking, error) {
 	collection := c.conn.Database(viper.GetString(config.DbName)).Collection(parkingCollection)
-	filter := bson.M{"id": parkingID}
-	var parking models.Parking
-	err := collection.FindOne(context.Background(), filter).Decode(&parking)
+
+	// Get parkings with ExitTime equal to the specified date
+	startOfDay := time.Date(exitDate.Year(), exitDate.Month(), exitDate.Day(), 0, 0, 0, 0, time.UTC)
+	endOfDay := startOfDay.AddDate(0, 0, 1).Add(-time.Nanosecond)
+	filter := bson.M{"exit_time": bson.M{"$gte": startOfDay, "$lte": endOfDay}}
+
+	cursor, err := collection.Find(context.Background(), filter)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get parking")
+		return nil, errors.Wrap(err, "failed to retrieve parkings")
 	}
-	return &parking, nil
+
+	// Decode parkings into a slice
+	var parkings []*models.Parking
+	for cursor.Next(context.Background()) {
+		var p models.Parking
+		if err := cursor.Decode(&p); err != nil {
+			return nil, errors.Wrap(err, "failed to decode parking record")
+		}
+		parkings = append(parkings, &p)
+	}
+
+	return parkings, nil
 }

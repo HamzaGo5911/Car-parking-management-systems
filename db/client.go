@@ -3,15 +3,17 @@ package db
 import (
 	"Car-parking-management-systems/models"
 	"log"
+	"time"
 )
 
 // DataStore is an interface for query ops
 type DataStore interface {
 	SaveCar(car *models.Car) (string, error)
-	GetCarById(id string) (*models.Car, error)
+	GetCarByID(id string) (*models.Car, error)
 	DeleteCar(id string) error
 	SaveParking(parking *models.Parking) (string, error)
-	GetParkingById(id string) (*models.Parking, error)
+	GetParkingByID(id string) (*models.Parking, error)
+	GetParkingsOnDate(exitDate time.Time) ([]*models.Parking, error)
 	DeleteParking(id string) error
 	Close() error
 }

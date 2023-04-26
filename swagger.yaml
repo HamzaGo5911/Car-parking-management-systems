@@ -1,0 +1,226 @@
+swagger: "2.0"
+info:
+  description: "A car-parking-management-system "
+  version: "1.0.0"
+  title: "Car-Parking API"
+host: "localhost:8080"
+basePath: "/"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+paths:
+  /cars:
+    post:
+      operationId: "addCar"
+      parameters:
+        - in: "body"
+          name: "car"
+          description: "car's details"
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        201:
+          description: "car added or updated"
+          schema:
+            $ref: "#/definitions/Car"
+        400:
+          description: "bad request"
+        500:
+          description: "internal server error"
+
+  /cars/{id}:
+    get:
+      operationId: "getCar"
+      parameters:
+        - in: "path"
+          type: "string"
+          name: "id"
+          required: true
+          description: "ID of the car"
+      description: "return car based on ID"
+      responses:
+        200:
+          description: "car response"
+          schema:
+            $ref: "#/definitions/Car"
+        404:
+          description: "car not found"
+        500:
+          description: "internal server error"
+    put:
+      operationId: "updateCar"
+      parameters:
+        - in: "path"
+          name: "id"
+          type: "string"
+          description: "ID of the car"
+          required: true
+        - in: "body"
+          name: "car"
+          description: "car's details"
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        200:
+          description: "car updated"
+          schema:
+            $ref: "#/definitions/Car"
+        400:
+          description: "bad request"
+        404:
+          description: "car not found"
+        500:
+          description: "internal server error"
+    delete:
+      operationId: "deleteCar"
+      parameters:
+        - in: "path"
+          name: "id"
+          type: "string"
+          description: "ID of the car"
+          required: true
+      responses:
+        204:
+          description: "car deleted"
+        404:
+          description: "car not found"
+        500:
+          description: "internal server error"
+  /parkings:
+    post:
+      operationId: "addParking"
+      parameters:
+        - in: "body"
+          name: "parking"
+          description: "Parking's details"
+          required: true
+          schema:
+            $ref: "#/definitions/Parking"
+      responses:
+        201:
+          description: "Parking added or updated"
+          schema:
+            $ref: "#/definitions/Parking"
+        400:
+          description: "Bad request"
+        500:
+          description: "Internal server error"
+  /parkings/{id}:
+    get:
+      operationId: "getParking"
+      parameters:
+        - in: "path"
+          type: "string"
+          name: "id"
+          required: true
+          description: "ID of the parking"
+      description: "return parking based on ID"
+      responses:
+        200:
+          description: "parking response"
+          schema:
+            $ref: "#/definitions/Parking"
+        404:
+          description: "parking not found"
+        500:
+          description: "internal server error"
+    put:
+        operationId: "updateParking"
+        parameters:
+          - in: "path"
+            name: "id"
+            type: "string"
+            description: "ID of the parking"
+            required: true
+          - in: "body"
+            name: "parking"
+            description: "parking's details"
+            required: true
+            schema:
+              $ref: "#/definitions/Parking"
+        responses:
+          200:
+            description: "parking updated"
+            schema:
+              $ref: "#/definitions/Parking"
+          400:
+            description: "bad request"
+          404:
+            description: "parking not found"
+          500:
+            description: "internal server error"
+    delete:
+      operationId: "deleteParking"
+      parameters:
+        - in: "path"
+          name: "id"
+          type: "string"
+          description: "ID of the parking"
+          required: true
+      responses:
+        204:
+          description: "parking deleted"
+        404:
+          description: "parking not found"
+        500:
+          description: "internal server error"
+        200:
+          description: "parking deleted with exit time"
+
+  /parkings/revenue/{exit_time}:
+    get:
+      operationId: "getParkingByDate"
+      parameters:
+        - in: "path"
+          type: "string"
+          name: "exit_time"
+          required: true
+          description: "Entry time of the parking"
+      description: "Return parkings based on entry time"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Parking"
+        404:
+          description: "Parking not found"
+        500:
+          description: "Internal server error"
+definitions:
+      Car:
+        type: "object"
+        properties:
+          id:
+            type: "string"
+          licensePlate:
+            type: "string"
+          brand:
+            type: "string"
+          model:
+            type: "string"
+          color:
+            type: "string"
+          plateNumber:
+            type: "string"
+      Parking:
+        type: "object"
+        properties:
+          id:
+            type: string
+          entry_time:
+            type: string
+            format: date-time
+          exit_time:
+            type: string
+            format: date-time
+          hourly_rate:
+            type: number
+          total_amount:
+            type: "number"
